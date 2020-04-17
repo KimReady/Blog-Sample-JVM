@@ -1,27 +1,40 @@
-import com.google.gson.Gson
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.MediaType
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.http.GET
+import retrofit2.http.Path
 
 @Serializable
-data class User (
-    val name: String,
-    val email: String,
-    val age: Int = 20
+data class Album (
+    val userId: Int,
+    val id: Int,
+    val title: String,
+    val comment: String = "default comment"
 )
 
+interface ReadyService {
+    @GET("albums/{id}")
+    fun getAlbum(@Path("id") id: Int): Call<Album>
+}
+
 fun main() {
-    val jsonString = """
-            {
-                "name" : "Ready Kim",
-                "email" : "ready.kim@gmail.com"
-            }
-        """.trimIndent()
+    val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://jsonplaceholder.typicode.com/")
+        .addConverterFactory(Json.asConverterFactory(MediaType.parse("application/json")!!))
+        .build()
 
-    val user = Gson().fromJson(jsonString, User::class.java)
+    val service = retrofit.create(ReadyService::class.java)
 
-    println(user)
+    val call = service.getAlbum(3)
+    val response = call.execute()
 
-    val user2 = Json.parse(User.serializer(), jsonString)
-
-    println(user2)
+    if (response.isSuccessful) {
+        val album: Album? = response.body()
+        println(album)
+    } else {
+        println("Failed to load data.")
+    }
 }
