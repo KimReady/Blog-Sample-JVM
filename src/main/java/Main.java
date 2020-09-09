@@ -1,5 +1,9 @@
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello, Ready Story!");
+        Shape tri = new Triangle(new RedColor());
+        tri.applyColor();
+
+        Shape pent = new Pentagon(new GreenColor());
+        pent.applyColor();
     }
 }
